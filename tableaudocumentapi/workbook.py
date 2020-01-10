@@ -1,7 +1,7 @@
 import weakref
 
 
-from tableaudocumentapi import Datasource, xfile
+from tableaudocumentapi import Datasource, Thumbnail, xfile
 from tableaudocumentapi.xfile import xml_open
 
 
@@ -30,6 +30,8 @@ class Workbook(object):
             self._workbookRoot, self._datasource_index
         )
 
+        self._thumbnails = self._prepare_thumbnails(self._workbookRoot)
+
     @property
     def datasources(self):
         return self._datasources
@@ -37,6 +39,11 @@ class Workbook(object):
     @property
     def worksheets(self):
         return self._worksheets
+
+    @property
+    def thumbnails(self):
+        return self._thumbnails
+
 
     @property
     def filename(self):
@@ -116,3 +123,18 @@ class Workbook(object):
                         datasource.fields[column_name].add_used_in(worksheet_name)
 
         return worksheets
+
+    @staticmethod
+    def _prepare_thumbnails(xml_root):
+        thumbnails = []
+
+        # loop through our datasources and append
+        thumbnail_elements = xml_root.find('thumbnails')
+        if thumbnail_elements is None:
+            return []
+
+        for thumbnail in thumbnail_elements:
+            t = Thumbnail(thumbnail)
+            thumbnails.append(t)
+
+        return thumbnails
